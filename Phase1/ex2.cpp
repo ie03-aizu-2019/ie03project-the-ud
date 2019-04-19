@@ -1,4 +1,5 @@
 #include<iostream>
+#include<algorithm>
 #include<vector>
 using namespace std;
 #define INF 1e9
@@ -6,6 +7,9 @@ using namespace std;
 
 struct Point{
   double x,y;
+  bool operator<(const Point& right)const{
+    return x==right.x?y<right.y:x<right.x;
+  }
 };
 
 struct Edge{
@@ -59,14 +63,26 @@ int main(){
     road[i]={b,e};
   }
 
-  int a=road[0].b;
-  int b=road[0].e;
-  int c=road[1].b;
-  int d=road[1].e;
-  Point ans=findIntersection(point[a],point[b],point[c],point[d]);
+  vector<Point> ans;
 
-  if(ans.x==INF)cout<<"NA"<<endl;
-  else cout<<ans.x<<" "<<ans.y<<endl;
+  //ansに交差点を追加
+  for(int i=0;i<m;i++){
+    for(int j=i+1;j<m;j++){
+	 int a=road[i].b;
+	 int b=road[i].e;
+	 int c=road[j].b;
+	 int d=road[j].e;
+	 Point tmp=findIntersection(point[a],point[b],point[c],point[d]);
+	 if(tmp.x==INF)continue;
+	 ans.push_back(tmp);
+    }
+  }
+
+  sort(ans.begin(),ans.end());
   
+  for(int i=0;i<ans.size();i++){
+    cout<<ans[i].x<<" "<<ans[i].y<<endl;
+  }
+
   return 0;
 }
