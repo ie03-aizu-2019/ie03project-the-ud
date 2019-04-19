@@ -45,25 +45,25 @@ Point findIntersection(Point p1,Point p2,Point p3,Point p4){
 int main(){
   int n,m,p,q;
   cin>>n>>m>>p>>q;
-  vector<Point> pt(n);
-  vector<Edge> rd(m);
+  vector<Point> point(n);
+  vector<Edge> road(m);
   for(int i=0;i<n;i++){
     double x,y;
     cin>>x>>y;
-    pt[i]=(Point){x,y};
+    point[i]=(Point){x,y};
   }
   for(int i=0;i<m;i++){
     int b,e;
     cin>>b>>e;
     b--,e--;//頂点は0-indexedで管理
-    rd[i]=(Edge){b,e};
+    road[i]=(Edge){b,e};
   }
 
-  int a=rd[0].b;
-  int b=rd[0].e;
-  int c=rd[1].b;
-  int d=rd[1].e;
-  Point ans=findIntersection(pt[a],pt[b],pt[c],pt[d]);
+  int a=road[0].b;
+  int b=road[0].e;
+  int c=road[1].b;
+  int d=road[1].e;
+  Point ans=findIntersection(point[a],point[b],point[c],point[d]);
 
   if(ans.x==INF)cout<<"NA"<<endl;
   else cout<<ans.x<<" "<<ans.y<<endl;
