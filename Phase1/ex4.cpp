@@ -156,13 +156,14 @@ int stringToVertex(string s,int n){
   return res-1;
 }
 
-//distから経路を復元
 vector<int> restore(int s,int t,vector<vector<int> > graph,vector<Point> point,vector<double> dist){
   vector<int> route;
-  vector<vector<int> > graph2(N);//
+  vector<vector<int> > graph2(N);//s-t間の最短経路のみを残した有向グラフ
   queue<int> que;
-  int used[N]={};//
+  int used[N]={};//未探索の頂点は０探索済みなら１
   que.push(t);
+  
+  //tからBFSをしてgraph2を構築
   while(que.size()){
     int v=que.front();
     que.pop();
@@ -177,6 +178,8 @@ vector<int> restore(int s,int t,vector<vector<int> > graph,vector<Point> point,v
 	 }
     }
   }
+  
+  //sから辞書順に頂点を追加
   int node=s;
   while(1){
     route.push_back(node);
