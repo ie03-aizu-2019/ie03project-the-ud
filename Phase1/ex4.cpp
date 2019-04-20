@@ -96,7 +96,7 @@ vector<vector<int> > makeGraph(int n,int m,vector<Point> &point,vector<Edge> roa
 	 //交差点の乗った線分に対し左(上)側の端点と交差点をグラフに追加
 	 graph[np1].push_back(n+i);
 	 graph[n+i].push_back(np1);
-	 //左(上)側の頂点を交差点に更新
+	 //左(上)側の端点を交差点に更新
 	 road[edgeNum1].b=n+i;	 
     }else{
 	 graph[np2].push_back(n+i);
@@ -119,7 +119,7 @@ vector<vector<int> > makeGraph(int n,int m,vector<Point> &point,vector<Edge> roa
 	 road[edgeNum2].e=n+i;	 
     }   
   }
-
+  //残った線分をグラフに追加
   for(int i=0;i<m;i++){
     graph[road[i].b].push_back(road[i].e);
     graph[road[i].e].push_back(road[i].b);
