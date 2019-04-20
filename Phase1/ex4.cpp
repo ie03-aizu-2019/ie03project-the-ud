@@ -79,12 +79,11 @@ vector<double> dijkstra(int start,vector<vector<int> > graph,vector<Point> point
 
 typedef pair<int,int> P;
 typedef pair<Point,P> PP;//(頂点,(辺番号1,辺番号2))
-vector<vector<int> > makeGraph(int n,int m,vector<Point> &point,vector<Edge> road,vector<PP> c){
+vector<vector<int> > makeGraph(int n,int m,vector<Point> point,vector<Edge> road,vector<PP> c){
   vector<vector<int> > graph(N);
 
   //交差点をx軸の負の方向から見ていき線分を分割する
   for(int i=0;i<c.size();i++){
-    point.push_back(c[i].first);
     int edgeNum1=c[i].second.first;
     int edgeNum2=c[i].second.second;
     int np1=road[edgeNum1].b;
@@ -127,9 +126,8 @@ vector<vector<int> > makeGraph(int n,int m,vector<Point> &point,vector<Edge> roa
   return graph;
 }
 
-//交差点を列挙してx、y順にソートする
-vector<PP> makeAddPoint(int m,vector<Edge> road,vector<Point> point){
-  vector<PP> addPoint;
+vector<PP> makeIntersection(int m,vector<Edge> road,vector<Point> &point){
+  vector<PP> intersection;
   for(int i=0;i<m;i++){
     for(int j=i+1;j<m;j++){
 	 int a=road[i].b;
@@ -138,11 +136,15 @@ vector<PP> makeAddPoint(int m,vector<Edge> road,vector<Point> point){
 	 int d=road[j].e;
 	 Point tmp=findIntersection(point[a],point[b],point[c],point[d]);
 	 if(tmp.x==INF)continue;
-	 addPoint.push_back(PP(tmp,P(i,j)));
+	 intersection.push_back(PP(tmp,P(i,j)));
     }
   }
-  sort(addPoint.begin(),addPoint.end());
-  return addPoint;
+  sort(intersection.begin(),intersection.end());
+  //pointに交差点を追加する
+  for(int i=0;i<intersection.size();i++){
+    point.push_back(intersection[i].first);
+  }
+  return intersection;
 }
 
 //交差点はci=n+i-1として扱う
@@ -210,8 +212,8 @@ int main(){
     road[i]={b,e};
   }
 
-  vector<PP> addPoint=makeAddPoint(m,road,point); 
-  vector<vector<int> > graph=makeGraph(n,m,point,road,addPoint);
+  vector<PP> intersection=makeIntersection(m,road,point); 
+  vector<vector<int> > graph=makeGraph(n,m,point,road,intersection);
   
   for(int i=0;i<q;i++){
     string stmp,ttmp;
