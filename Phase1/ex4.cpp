@@ -174,7 +174,6 @@ vector<int> restore(int s,int t,vector<vector<int> > graph,vector<Point> point,v
   return route;
 }
 
-
 int main(){
   int n,m,p,q;
   cin>>n>>m>>p>>q;
@@ -210,7 +209,7 @@ int main(){
 
     vector<double> dist=dijkstra(s,graph,point);
     if(dist[t]==INF){
-	 cout<<"NAA"<<endl;
+	 cout<<"NA"<<endl;
 	 continue;
     }
     cout<<dist[t]<<endl;
