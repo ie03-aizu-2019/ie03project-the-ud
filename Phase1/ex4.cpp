@@ -159,18 +159,34 @@ int stringToVertex(string s,int n){
 //distから経路を復元
 vector<int> restore(int s,int t,vector<vector<int> > graph,vector<Point> point,vector<double> dist){
   vector<int> route;
-  while(s!=t){
-    route.push_back(t);
-    for(int i=0;i<graph[t].size();i++){
-	 int to=graph[t][i];
-	 if(dist[to]-(dist[t]-point[t].dist(point[to]))<EPS){
-	   t=to;
-	   break;
+  vector<vector<int> > graph2(N);//
+  queue<int> que;
+  int used[N]={};//
+  que.push(t);
+  while(que.size()){
+    int v=que.front();
+    que.pop();
+    if(used[v])continue;
+    used[v]=1;
+    for(int i=0;i<graph[v].size();i++){
+	 int to=graph[v][i];
+	 if(dist[to]>dist[v])continue;
+	 if(abs(dist[v]-dist[to]-point[v].dist(point[to]))<EPS){
+	   que.push(to);
+	   graph2[to].push_back(v);
 	 }
     }
   }
-  route.push_back(s);
-  reverse(route.begin(),route.end());
+  int node=s;
+  while(1){
+    route.push_back(node);
+    if(node==t)break;
+    int mi=N+1;
+    for(int i=0;i<graph2[node].size();i++){
+	 mi=min(mi,graph2[node][i]);
+    }
+    node=mi;
+  }
   return route;
 }
 
