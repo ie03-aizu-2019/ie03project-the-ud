@@ -6,6 +6,7 @@
 using namespace std;
 #define INF 1e9
 #define EPS 1e-8
+#define N 30000
 
 struct Point{
   double x,y;
@@ -54,7 +55,7 @@ Point findIntersection(Point p1,Point p2,Point p3,Point p4){
   return {x,y};
 }
 
-typedef pair<double,int> Pdi;
+typedef pair<double,int> Pdi;//(最短距離、ノード番号)
 vector<double> dijkstra(int start,vector<vector<int> > graph,vector<Point> point){
   vector<double> dist(point.size(),INF);//dist[i]:=stratから頂点iに対する最短距離
   dist[start]=0;
@@ -77,9 +78,11 @@ vector<double> dijkstra(int start,vector<vector<int> > graph,vector<Point> point
 }
 
 typedef pair<int,int> P;
-typedef pair<Point,P> PP;
-vector<vector<int> > makeGraph(int n,int m,vector<Point> &point,vector<Edge> &road,vector<PP> &c){
-  vector<vector<int> > graph(251111);
+typedef pair<Point,P> PP;//(頂点,(辺番号1,辺番号2))
+vector<vector<int> > makeGraph(int n,int m,vector<Point> &point,vector<Edge> road,vector<PP> c){
+  vector<vector<int> > graph(N);
+
+  //交差点をx軸の負の方向から見ていき線分を分割する
   for(int i=0;i<c.size();i++){
     point.push_back(c[i].first);
     int edgeNum1=c[i].second.first;
@@ -90,8 +93,10 @@ vector<vector<int> > makeGraph(int n,int m,vector<Point> &point,vector<Edge> &ro
     Point p2=point[np2];
 
     if(p1<p2){
+	 //交差点の乗った線分に対し左(上)側の端点と交差点をグラフに追加
 	 graph[np1].push_back(n+i);
 	 graph[n+i].push_back(np1);
+	 //左(上)側の頂点を交差点に更新
 	 road[edgeNum1].b=n+i;	 
     }else{
 	 graph[np2].push_back(n+i);
@@ -122,6 +127,25 @@ vector<vector<int> > makeGraph(int n,int m,vector<Point> &point,vector<Edge> &ro
   return graph;
 }
 
+//交差点を列挙してx、y順にソートする
+vector<PP> makeAddPoint(int m,vector<Edge> road,vector<Point> point){
+  vector<PP> addPoint;
+  for(int i=0;i<m;i++){
+    for(int j=i+1;j<m;j++){
+	 int a=road[i].b;
+	 int b=road[i].e;
+	 int c=road[j].b;
+	 int d=road[j].e;
+	 Point tmp=findIntersection(point[a],point[b],point[c],point[d]);
+	 if(tmp.x==INF)continue;
+	 addPoint.push_back(PP(tmp,P(i,j)));
+    }
+  }
+  sort(addPoint.begin(),addPoint.end());
+  return addPoint;
+}
+
+//交差点はci=n+i-1として扱う
 int stringToVertex(string s,int n){
   int res=0;
   if(s[0]=='C')res+=n;
@@ -132,6 +156,7 @@ int stringToVertex(string s,int n){
   return res-1;
 }
 
+//distから経路を復元
 vector<int> restore(int s,int t,vector<vector<int> > graph,vector<Point> point,vector<double> dist){
   vector<int> route;
   while(s!=t){
@@ -167,23 +192,7 @@ int main(){
     road[i]={b,e};
   }
 
-  vector<PP> addPoint;
-
-  //cに交差点を追加
-  for(int i=0;i<m;i++){
-    for(int j=i+1;j<m;j++){
-	 int a=road[i].b;
-	 int b=road[i].e;
-	 int c=road[j].b;
-	 int d=road[j].e;
-	 Point tmp=findIntersection(point[a],point[b],point[c],point[d]);
-	 if(tmp.x==INF)continue;
-	 addPoint.push_back(PP(tmp,P(i,j)));
-    }
-  }
-
-  sort(addPoint.begin(),addPoint.end());
-  
+  vector<PP> addPoint=makeAddPoint(m,road,point); 
   vector<vector<int> > graph=makeGraph(n,m,point,road,addPoint);
   
   for(int i=0;i<q;i++){
@@ -200,12 +209,10 @@ int main(){
     }
 
     vector<double> dist=dijkstra(s,graph,point);
-    
     if(dist[t]==INF){
 	 cout<<"NAA"<<endl;
 	 continue;
     }
-
     cout<<dist[t]<<endl;
 
     vector<int> route=restore(s,t,graph,point,dist);
