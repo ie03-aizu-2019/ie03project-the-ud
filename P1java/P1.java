@@ -60,10 +60,18 @@ class Point {
 }// end of class Point
 
 class Edge{
-  double x,y;
-  public Edge(double x,double y){
+  int x,y;
+  public Edge(int x,int y){
     this.x = x;
     this.y = y;
+  }
+
+  int getB(){
+    return x;
+  }
+
+  int getE(){
+    return y;
   }
 }
 
@@ -91,14 +99,24 @@ public class P1{
     }
 
     for(int i=0;i<m;i++){
-      double b,e;
-      b = scanner.nextDouble();
-      e = scanner.nextDouble();
+      int b,e;
+      b = scanner.nextInt();
+      e = scanner.nextInt();
       Edge enter2 = new Edge(b,e);
 
       roads.add(enter2);
     }
 
     List<Point> ans = new ArrayList<Point>();
+
+    for(int i=0;i<m;i++){
+      for(int j=i+1;j<m;j++){
+        int a = roads.get(i).getB();
+        int b = roads.get(i).getE();
+        int c = roads.get(j).getB();
+        int d = roads.get(j).getE();
+        Point tmp = findIntersection(points.get(a),points.get(b),points.get(c),points.get(d));
+      }
+    }
   }
 }
