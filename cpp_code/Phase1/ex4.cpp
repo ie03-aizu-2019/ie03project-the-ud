@@ -47,7 +47,6 @@ vector<PP> makeIntersection(int m,vector<Road> road,vector<Point> point);
 typedef pair<double,int> Pdi;//(最短距離、ノード番号)
 Path dijkstra(int s,int t,int sz,vector<vector<Edge> >& graph);
 vector<int> restore(int s,int t,vector<vector<Edge> >& graph,vector<double> dist);
-vector<Path> yensAlgorithm(int s,int t,vector<vector<Edge> >& graph);
 
 int main(){
   int n,m,p,q;
