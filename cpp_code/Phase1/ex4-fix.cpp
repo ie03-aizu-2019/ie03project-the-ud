@@ -34,6 +34,86 @@ struct Edge{
   double cost;
 };
 
+struct Path{
+  double dist;
+  vector<int> route;
+};
+
+Point findIntersection(Point p1,Point p2,Point p3,Point p4);
+typedef pair<int,int> P;
+typedef pair<Point,P> PP;//(頂点,(辺番号1,辺番号2))
+vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> road,vector<PP> c);
+vector<PP> makeIntersection(int m,vector<Road> road,vector<Point> point);
+typedef pair<double,int> Pdi;//(最短距離、ノード番号)
+Path dijkstra(int s,int t,const vector<vector<Edge> >& graph,vector<Point> point);
+vector<int> restore(int s,int t,const vector<vector<Edge> >& graph,vector<Point> point,vector<double> dist);
+
+int main(){
+  int n,m,p,q;
+  cin>>n>>m>>p>>q;
+  
+  vector<Point> point;
+  vector<Road> road;
+  map<string,int> stov;
+  
+  for(int i=0;i<n;i++){
+    double x,y;
+    cin>>x>>y;
+    Point pt={x,y,to_string(i+1)};
+    stov[pt.name]=point.size();
+    point.push_back(pt);
+  }
+  
+  for(int i=0;i<m;i++){
+    int b,e;
+    cin>>b>>e;
+    b--,e--;//頂点は0-indexedで管理
+    road.push_back({b,e});
+  }
+
+  vector<PP> intersection=makeIntersection(m,road,point);
+
+  //pointに交差点を追加する
+  for(int i=0;i<intersection.size();i++){
+   Point pt = intersection[i].first;
+   pt.name="C"+to_string(i+1);
+   stov[pt.name]=point.size();
+   point.push_back(pt);
+  }
+  
+  vector<vector<Edge> > graph=makeGraph(n,m,point,road,intersection);
+  
+  for(int i=0;i<q;i++){
+    string stmp,ttmp;
+    int s,t,k;
+    cin>>stmp>>ttmp>>k;
+
+    if(stov.count(stmp)==0||stov.count(ttmp)==0){
+	 cout<<"NA"<<endl;
+	 continue;
+    }
+    
+    s=stov[stmp];
+    t=stov[ttmp];
+    
+    Path path=dijkstra(s,t,graph,point);
+    if(path.dist==INF){
+	 cout<<"NA"<<endl;
+	 continue;
+    }
+    
+    cout<<path.dist<<endl;
+    for(int i=0;i<path.route.size();i++){
+	 if(i)cout<<" ";
+	 int pn=path.route[i];
+	 cout<<point[pn].name;
+    }
+    cout<<endl;
+  }
+
+  return 0;
+}
+
 Point findIntersection(Point p1,Point p2,Point p3,Point p4){
   Point intersection = {INF,INF,"no name"};
   double ta=(p3.x-p4.x)*(p1.y-p3.y)+(p3.y-p4.y)*(p3.x-p1.x);
@@ -71,12 +151,12 @@ Point findIntersection(Point p1,Point p2,Point p3,Point p4){
   return intersection;
 }
 
-typedef pair<double,int> Pdi;//(最短距離、ノード番号)
-vector<double> dijkstra(int start,const vector<vector<Edge> >& graph,vector<Point> point){
+
+Path dijkstra(int s,int t,const vector<vector<Edge> >& graph,vector<Point> point){
   vector<double> dist(point.size(),INF);//dist[i]:=stratから頂点iに対する最短距離
-  dist[start]=0;
+  dist[s]=0;
   priority_queue<Pdi,vector<Pdi>,greater<Pdi> > que;
-  que.push(Pdi(0,start));
+  que.push(Pdi(0,s));
   while(que.size()>0){
     Pdi tmp=que.top();
     que.pop();
@@ -91,11 +171,11 @@ vector<double> dijkstra(int start,const vector<vector<Edge> >& graph,vector<Poin
 	 }
     }
   }
-  return dist;
+  if(dist[t]==INF)return {INF,vector<int>()};
+  Path path={dist[t],restore(s,t,graph,point,dist)};
+  return path;
 }
 
-typedef pair<int,int> P;
-typedef pair<Point,P> PP;//(頂点,(辺番号1,辺番号2))
 vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> road,vector<PP> c){
   vector<vector<Edge> > graph(N);
 
@@ -203,71 +283,4 @@ vector<int> restore(int s,int t,const vector<vector<Edge> >& graph,vector<Point>
     node=mi;
   }
   return route;
-}
-
-int main(){
-  int n,m,p,q;
-  cin>>n>>m>>p>>q;
-  
-  vector<Point> point;
-  vector<Road> road;
-  map<string,int> stov;
-  
-  for(int i=0;i<n;i++){
-    double x,y;
-    cin>>x>>y;
-    Point pt={x,y,to_string(i+1)};
-    stov[pt.name]=point.size();
-    point.push_back(pt);
-  }
-  
-  for(int i=0;i<m;i++){
-    int b,e;
-    cin>>b>>e;
-    b--,e--;//頂点は0-indexedで管理
-    road.push_back({b,e});
-  }
-
-  vector<PP> intersection=makeIntersection(m,road,point);
-
-  //pointに交差点を追加する
-  for(int i=0;i<intersection.size();i++){
-   Point pt = intersection[i].first;
-   pt.name="C"+to_string(i+1);
-   stov[pt.name]=point.size();
-   point.push_back(pt);
-  }
-  
-  vector<vector<Edge> > graph=makeGraph(n,m,point,road,intersection);
-  
-  for(int i=0;i<q;i++){
-    string stmp,ttmp;
-    int s,t,k;
-    cin>>stmp>>ttmp>>k;
-
-    if(stov.count(stmp)==0||stov.count(ttmp)==0){
-	 cout<<"NA"<<endl;
-	 continue;
-    }
-    
-    s=stov[stmp];
-    t=stov[ttmp];
-
-    vector<double> dist=dijkstra(s,graph,point);
-    if(dist[t]==INF){
-	 cout<<"NA"<<endl;
-	 continue;
-    }
-    
-    cout<<dist[t]<<endl;
-
-    vector<int> route=restore(s,t,graph,point,dist);
-    for(int i=0;i<route.size();i++){
-	 if(i)cout<<" ";	 
-	 cout<<point[route[i]].name;
-    }
-    cout<<endl;
-  }
-
-  return 0;
 }
