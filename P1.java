@@ -55,7 +55,12 @@ class Point {
 
     return judge;
   }
-
+  double getX(){
+    return x;
+  }
+  double getY(){
+    return y;
+  }
 
 }// end of class Point
 
@@ -78,24 +83,27 @@ class Edge{
 public class P1{
   public static void main(String[] args){
     int n,m,p,q;
+    final double INF = 1e9;
 
    Scanner scanner = new Scanner(System.in);
     n = scanner.nextInt();
     m = scanner.nextInt();
     p = scanner.nextInt();
     q = scanner.nextInt();
-
+//System.out.println("a");
     List<Point> points = new ArrayList<Point>();
     List<Edge> roads = new ArrayList<Edge>();
-
+    Point enter;
     double x,y;
     for(int i=0;i<n;i++){
-
       x = scanner.nextDouble();
       y = scanner.nextDouble();
-      Point enter = new Point(x,y);
+
+      enter = new Point(x,y);
 
       points.add(enter);
+      //System.out.println(points.size());
+      //System.out.println(points.get(i).getY());
     }
 
     for(int i=0;i<m;i++){
@@ -115,9 +123,16 @@ public class P1{
         int b = roads.get(i).getE();
         int c = roads.get(j).getB();
         int d = roads.get(j).getE();
-        Point tmp = Point.findIntersection(points.get(a),points.get(b),points.get(c),points.get(d));
+
+        Point tmp = Point.findIntersection(points.get(a-1),points.get(b-1),points.get(c-1),points.get(d-1));
+        if(tmp.x==INF) continue;
+        ans.add(tmp);
 
       }
     }
+    for(Point pt : ans){
+      System.out.println(pt.getX() + pt.getY());
+    }
+
   }
 }
