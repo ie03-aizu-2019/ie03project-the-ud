@@ -45,8 +45,8 @@ typedef pair<Point,P> PP;//(頂点,(辺番号1,辺番号2))
 vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> road,vector<PP> c);
 vector<PP> makeIntersection(int m,vector<Road> road,vector<Point> point);
 typedef pair<double,int> Pdi;//(最短距離、ノード番号)
-Path dijkstra(int s,int t,int sz,vector<vector<Edge> >& graph);
-vector<int> restore(int s,int t,vector<vector<Edge> >& graph,vector<double> dist);
+Path dijkstra(int s,int t,const vector<vector<Edge> >& graph,vector<Point> point);
+vector<int> restore(int s,int t,const vector<vector<Edge> >& graph,vector<Point> point,vector<double> dist);
 
 int main(){
   int n,m,p,q;
@@ -95,8 +95,8 @@ int main(){
     
     s=stov[stmp];
     t=stov[ttmp];
-   
-    Path path=dijkstra(s,t,(int)point.size(),graph);
+    
+    Path path=dijkstra(s,t,graph,point);
     if(path.dist==INF){
 	 cout<<"NA"<<endl;
 	 continue;
@@ -152,8 +152,8 @@ Point findIntersection(Point p1,Point p2,Point p3,Point p4){
 }
 
 
-Path dijkstra(int s,int t,int sz,vector<vector<Edge> >& graph){
-  vector<double> dist(sz,INF);//dist[i]:=stratから頂点iに対する最短距離
+Path dijkstra(int s,int t,const vector<vector<Edge> >& graph,vector<Point> point){
+  vector<double> dist(point.size(),INF);//dist[i]:=stratから頂点iに対する最短距離
   dist[s]=0;
   priority_queue<Pdi,vector<Pdi>,greater<Pdi> > que;
   que.push(Pdi(0,s));
@@ -172,7 +172,7 @@ Path dijkstra(int s,int t,int sz,vector<vector<Edge> >& graph){
     }
   }
   if(dist[t]==INF)return {INF,vector<int>()};
-  Path path={dist[t],restore(s,t,graph,dist)};
+  Path path={dist[t],restore(s,t,graph,point,dist)};
   return path;
 }
 
@@ -247,7 +247,7 @@ vector<PP> makeIntersection(int m,vector<Road> road,vector<Point> point){
 }
 
 //最短経路の頂点番号を返す関数
-vector<int> restore(int s,int t,vector<vector<Edge> >& graph,vector<double> dist){
+vector<int> restore(int s,int t,const vector<vector<Edge> >& graph,vector<Point> point,vector<double> dist){
   vector<int> route;
   vector<vector<int> > graph2(N);//s-t間の最短経路のみを残した有向グラフ
   queue<int> que;
