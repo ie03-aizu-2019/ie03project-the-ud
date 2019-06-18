@@ -114,13 +114,13 @@ int main(){
     if(paths.size()==0)cout<<"NA"<<endl;
     for(int j=0;j<paths.size();j++){
 	 cout<<paths[j].dist<<endl;
-	 /*
+
 	 for(int l=0;l<paths[j].route.size();l++){
 	   if(l)cout<<" ";
 	   cout<<point[paths[j].route[l]].name;
 	 }
 	 cout<<endl;
-	  */
+
     }
   }
 
