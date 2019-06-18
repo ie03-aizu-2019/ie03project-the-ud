@@ -134,7 +134,7 @@ Point findIntersection(Point p1,Point p2,Point p3,Point p4){
   double tc=(p1.x-p2.x)*(p3.y-p1.y)+(p1.y-p2.y)*(p1.x-p3.x);
   double td=(p1.x-p2.x)*(p4.y-p1.y)+(p1.y-p2.y)*(p1.x-p4.x);
   //交差判定 交差していなければINFを返す
-  if(tc*td>0||ta*tb>0)return intersection;
+  if(tc*td>=0||ta*tb>=0)return intersection;
 
   //交差点のｘ座標が決まっている場合
   if(p1.x==p2.x){
@@ -249,9 +249,13 @@ vector<PP> makeIntersection(vector<Road>& road,vector<Point> point){
 	 int b=road[i].b;
 	 int e=road[i].e;
 	 if(b==j||e==j)continue;
-	 Point tmp=findIntersection(point[b],point[e],point[j],{INF,INF});
-	 if(tmp.x==INF)continue;
-	 if(tmp==point[j]){
+	 if(point[e]<point[b])swap(b,e);
+	 if(point[j]<point[b]||point[e]<point[j])continue;
+	 int ax=point[b].x-point[j].x;
+	 int ay=point[b].y-point[j].y;
+	 int bx=point[j].x-point[e].x;
+	 int by=point[j].y-point[e].y;
+	 if(ax*by==ay*bx){
 	   road.push_back({j,b});
 	   road[i].b=j;
 	 }
