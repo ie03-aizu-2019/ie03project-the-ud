@@ -44,13 +44,13 @@ struct Path{
   double dist;
   vector<int> route;
   bool operator<(const Path& right)const{
-    return dist<right.dist;
+    return dist==right.dist?route<right.route:dist<right.dist;
   }
   bool operator>(const Path& right)const{
-    return dist>right.dist;
+    return dist==right.dist?route>right.route:dist>right.dist;
   }
   bool operator==(const Path& right)const{
-    return dist==right.dist;
+    return dist==right.dist&&route==right.route;
   }
 };
 
