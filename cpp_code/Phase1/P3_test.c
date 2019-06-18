@@ -9,8 +9,8 @@ int main(){
   srand(1);
 
 
-  n=rand()%98+2;
-  m=rand()%50+1;
+  n=rand()%998+2;
+  m=rand()%500+1;
   printf("%d %d %d %d¥n",n,m,p,q);
   for(int i=0;i<n;i++){
     x=rand()%10000;
