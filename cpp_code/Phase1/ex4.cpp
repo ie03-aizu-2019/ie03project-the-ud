@@ -5,6 +5,7 @@
 #include<queue>
 #include<string>
 #include<map>
+#include<set>
 using namespace std;
 #define INF 1e9
 #define EPS 1e-8
@@ -18,7 +19,7 @@ struct Point{
     return x==right.x?y<right.y:x<right.x;
   }
   bool operator==(const Point& right)const{
-    return x==right.x&&y==right.y;
+    return abs(x-right.x)<EPS&&abs(y-right.y)<EPS;
   }
   double dist(Point p){
     return sqrt((x-p.x)*(x-p.x)+(y-p.y)*(y-p.y));
@@ -34,17 +35,28 @@ struct Edge{
   double cost;
 };
 
+typedef pair<int,int> P;
+typedef pair<Point,P> PP;//(頂点,(辺番号1,辺番号2))
+typedef pair<double,int> Pdi;//(最短距離,ノード番号)
+
+
 struct Path{
   double dist;
   vector<int> route;
+  bool operator<(const Path& right)const{
+    return dist==right.dist?route<right.route:dist<right.dist;
+  }
+  bool operator>(const Path& right)const{
+    return dist==right.dist?route>right.route:dist>right.dist;
+  }
+  bool operator==(const Path& right)const{
+    return dist==right.dist&&route==right.route;
+  }
 };
 
 Point findIntersection(Point p1,Point p2,Point p3,Point p4);
-typedef pair<int,int> P;
-typedef pair<Point,P> PP;//(頂点,(辺番号1,辺番号2))
 vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> road,vector<PP> c);
-vector<PP> makeIntersection(int m,vector<Road> road,vector<Point> point);
-typedef pair<double,int> Pdi;//(最短距離、ノード番号)
+vector<PP> makeIntersection(vector<Road>& road,vector<Point> point);
 Path dijkstra(int s,int t,int sz,vector<vector<Edge> >& graph);
 vector<int> restore(int s,int t,vector<vector<Edge> >& graph,vector<double> dist);
 
@@ -70,9 +82,9 @@ int main(){
     b--,e--;//頂点は0-indexedで管理
     road.push_back({b,e});
   }
-
-  vector<PP> intersection=makeIntersection(m,road,point);
-
+  
+  vector<PP> intersection=makeIntersection(road,point);
+  
   //pointに交差点を追加する
   for(int i=0;i<intersection.size();i++){
    Point pt = intersection[i].first;
@@ -95,18 +107,16 @@ int main(){
     
     s=stov[stmp];
     t=stov[ttmp];
-   
-    Path path=dijkstra(s,t,(int)point.size(),graph);
+
+    Path path = dijkstra(s,t,(int)point.size(),graph);
     if(path.dist==INF){
 	 cout<<"NA"<<endl;
 	 continue;
     }
-    
     cout<<path.dist<<endl;
     for(int i=0;i<path.route.size();i++){
 	 if(i)cout<<" ";
-	 int pn=path.route[i];
-	 cout<<point[pn].name;
+	 cout<<point[path.route[i]].name;
     }
     cout<<endl;
   }
@@ -220,7 +230,7 @@ vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> roa
     }   
   }
   //残った線分をグラフに追加
-  for(int i=0;i<m;i++){
+  for(int i=0;i<road.size();i++){
     int pn1=road[i].b,pn2=road[i].e;
     double cost=point[pn1].dist(point[pn2]);
     graph[pn1].push_back({pn2,cost});
@@ -229,14 +239,32 @@ vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> roa
   return graph;
 }
 
-vector<PP> makeIntersection(int m,vector<Road> road,vector<Point> point){
+vector<PP> makeIntersection(vector<Road>& road,vector<Point> point){
   vector<PP> intersection;
-  for(int i=0;i<m;i++){
-    for(int j=i+1;j<m;j++){
+  for(int i=0;i<road.size();i++){
+    for(int j=0;j<point.size();j++){
+	 int b=road[i].b;
+	 int e=road[i].e;
+	 if(b==j||e==j)continue;
+	 if(point[e]<point[b])swap(b,e);
+	 if(point[j]<point[b]||point[e]<point[j])continue;
+	 int ax=point[b].x-point[j].x;
+	 int ay=point[b].y-point[j].y;
+	 int bx=point[j].x-point[e].x;
+	 int by=point[j].y-point[e].y;
+	 if(ax*by==ay*bx){
+	   road.push_back({j,b});
+	   road[i].b=j;
+	 }
+    }
+  }
+  for(int i=0;i<road.size();i++){
+    for(int j=i+1;j<road.size();j++){
 	 int a=road[i].b;
 	 int b=road[i].e;
 	 int c=road[j].b;
 	 int d=road[j].e;
+	 if(a==c||a==d||b==c||b==d)continue;
 	 Point tmp=findIntersection(point[a],point[b],point[c],point[d]);
 	 if(tmp.x==INF)continue;
 	 intersection.push_back(PP(tmp,P(i,j)));
