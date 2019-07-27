@@ -10,6 +10,9 @@ struct Point{
   bool operator<(const Point& right)const{
     return x==right.x?y<right.y:x<right.x;
   }
+  bool operator==(const Point& right)const{
+    return abs(x-right.x)<EPS&&abs(y-right.y)<EPS;
+  }
 };
 
 struct Edge{
@@ -63,7 +66,7 @@ int main(){
     road[i]={b,e};
   }
 
-  vector<Point> ans;
+  vector<Point> tmpv,ans;
 
   //ansに交差点を追加
   for(int i=0;i<m;i++){
@@ -74,11 +77,16 @@ int main(){
 	 int d=road[j].e;
 	 Point tmp=findIntersection(point[a],point[b],point[c],point[d]);
 	 if(tmp.x==INF)continue;
-	 ans.push_back(tmp);
+	 tmpv.push_back(tmp);
     }
   }
 
-  sort(ans.begin(),ans.end());
+  sort(tmpv.begin(),tmpv.end());
+  if(tmpv.size()>0)ans.push_back(tmpv[0]);
+  for(int i=1;i<tmpv.size();i++){
+    if(tmpv[i-1]==tmpv[i])continue;
+    ans.push_back(tmpv[i]);
+  }
   
   for(int i=0;i<ans.size();i++){
     cout<<ans[i].x<<" "<<ans[i].y<<endl;
