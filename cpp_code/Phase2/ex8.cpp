@@ -88,11 +88,9 @@ int main(){
   vector<PP> intersection=makeIntersection(road,point);
   
   //pointに交差点を追加する
-  int intersectionCnt=1;
   for(int i=0;i<intersection.size();i++){
    Point pt = intersection[i].first;
-   if(i>0&&intersection[i-1].first==pt)continue;
-   pt.name="C"+to_string(intersectionCnt++);
+   pt.name="C"+to_string(i+1);
    stov[pt.name]=point.size();
    point.push_back(pt);
   }
@@ -116,6 +114,13 @@ int main(){
     if(paths.size()==0)cout<<"NA"<<endl;
     for(int j=0;j<paths.size();j++){
 	 cout<<paths[j].dist<<endl;
+
+	 for(int l=0;l<paths[j].route.size();l++){
+	   if(l)cout<<" ";
+	   cout<<point[paths[j].route[l]].name;
+	 }
+	 cout<<endl;
+
     }
   }
 
@@ -188,7 +193,6 @@ vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> roa
   vector<vector<Edge> > graph(N);
 
   //交差点をx軸の負の方向から見ていき線分を分割する
-  int icnt=0;
   for(int i=0;i<c.size();i++){
     int edgeNum1=c[i].second.first;
     int edgeNum2=c[i].second.second;
@@ -196,19 +200,19 @@ vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> roa
     int np2=road[edgeNum1].e;
     Point p1=point[np1];
     Point p2=point[np2];
-    
+
     if(p1<p2){
 	 //交差点の乗った線分に対し左(下)側の端点と交差点をグラフに追加
-	 double cost=p1.dist(point[n+icnt]);
-	 graph[np1].push_back({n+icnt,cost});
-	 graph[n+icnt].push_back({np1,cost});
+	 double cost=p1.dist(point[n+i]);
+	 graph[np1].push_back({n+i,cost});
+	 graph[n+i].push_back({np1,cost});
 	 //左(下)側の端点を交差点に更新
-	 road[edgeNum1].b=n+icnt;	 
+	 road[edgeNum1].b=n+i;	 
     }else{
-	 double cost=p2.dist(point[n+icnt]);
-	 graph[np2].push_back({n+icnt,cost});
-	 graph[n+icnt].push_back({np2,cost});
-	 road[edgeNum1].e=n+icnt;	 
+	 double cost=p2.dist(point[n+i]);
+	 graph[np2].push_back({n+i,cost});
+	 graph[n+i].push_back({np2,cost});
+	 road[edgeNum1].e=n+i;	 
     }
 
     np1=road[edgeNum2].b;
@@ -217,19 +221,17 @@ vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> roa
     p2=point[np2];
 
     if(p1<p2){
-	 double cost=p1.dist(point[n+icnt]);
-	 graph[np1].push_back({n+icnt,cost});
-	 graph[n+icnt].push_back({np1,cost});
-	 road[edgeNum2].b=n+icnt;	 
+	 double cost=p1.dist(point[n+i]);
+	 graph[np1].push_back({n+i,cost});
+	 graph[n+i].push_back({np1,cost});
+	 road[edgeNum2].b=n+i;	 
     }else{
-	 double cost=p2.dist(point[n+icnt]);
-	 graph[np2].push_back({n+icnt,cost});
-	 graph[n+icnt].push_back({np2,cost});
-	 road[edgeNum2].e=n+icnt;	 
-    }
-    if(i==0||!(c[i-1].first==c[i].first))icnt++;
+	 double cost=p2.dist(point[n+i]);
+	 graph[np2].push_back({n+i,cost});
+	 graph[n+i].push_back({np2,cost});
+	 road[edgeNum2].e=n+i;	 
+    }   
   }
-  
   //残った線分をグラフに追加
   for(int i=0;i<road.size();i++){
     int pn1=road[i].b,pn2=road[i].e;
