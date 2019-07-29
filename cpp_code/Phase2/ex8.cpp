@@ -57,10 +57,8 @@ struct Path{
 Point findIntersection(Point p1,Point p2,Point p3,Point p4);
 vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> road,vector<PP> c);
 vector<PP> makeIntersection(vector<Road>& road,vector<Point> point);
-Path dijkstra(int s,int t,int sz,vector<vector<Edge> >& graph);
-vector<int> restore(int s,int t,vector<vector<Edge> >& graph,vector<double> dist);
-vector<Path> yensAlgorithm(int k,int s,int t,int sz,vector<vector<Edge> >& graph);
-bool findVec(vector<int>& v1,vector<int>& v2);
+vector<P> findBridge(vector<vector<Edge> >& g);
+int dfs(vector<vector<Edge> >& g,vector<P>& res,int v,int& count,int from,vector<int>& low,vector<int>& pre);
 
 int main(){
   int n,m,p,q;
@@ -97,31 +95,11 @@ int main(){
   
   vector<vector<Edge> > graph=makeGraph(n,m,point,road,intersection);
   
-  for(int i=0;i<q;i++){
-    string stmp,ttmp;
-    int s,t,k;
-    cin>>stmp>>ttmp>>k;
-
-    if(stov.count(stmp)==0||stov.count(ttmp)==0){
-	 cout<<"NA"<<endl;
-	 continue;
-    }
-    
-    s=stov[stmp];
-    t=stov[ttmp];
-
-    vector<Path> paths=yensAlgorithm(k,s,t,(int)point.size(),graph);
-    if(paths.size()==0)cout<<"NA"<<endl;
-    for(int j=0;j<paths.size();j++){
-	 cout<<paths[j].dist<<endl;
-
-	 for(int l=0;l<paths[j].route.size();l++){
-	   if(l)cout<<" ";
-	   cout<<point[paths[j].route[l]].name;
-	 }
-	 cout<<endl;
-
-    }
+  vector<P> bridge=findBridge(graph);
+  for(int i=0;i<bridge.size();i++){
+    int n1=bridge[i].first;
+    int n2=bridge[i].second;
+    cout<<point[n1].name<<" "<<point[n2].name<<endl;
   }
 
   return 0;
@@ -162,31 +140,6 @@ Point findIntersection(Point p1,Point p2,Point p3,Point p4){
   intersection.x=x;
   intersection.y=y;
   return intersection;
-}
-
-
-Path dijkstra(int s,int t,int sz,vector<vector<Edge> >& graph){
-  vector<double> dist(sz,INF);//dist[i]:=stratから頂点iに対する最短距離
-  dist[s]=0;
-  priority_queue<Pdi,vector<Pdi>,greater<Pdi> > que;
-  que.push(Pdi(0,s));
-  while(que.size()>0){
-    Pdi tmp=que.top();
-    que.pop();
-    int v=tmp.second;
-    if(dist[v]<tmp.first)continue;
-    for(int i=0;i<graph[v].size();i++){
-	 int to=graph[v][i].to;
-	 double cost=graph[v][i].cost;
-	 if(dist[to]>dist[v]+cost){
-	   dist[to]=dist[v]+cost;
-	   que.push(Pdi(dist[to],to));
-	 }
-    }
-  }
-  if(dist[t]==INF)return {INF,vector<int>()};
-  Path path={dist[t],restore(s,t,graph,dist)};
-  return path;
 }
 
 vector<vector<Edge> > makeGraph(int n,int m,vector<Point> point,vector<Road> road,vector<PP> c){
@@ -277,106 +230,29 @@ vector<PP> makeIntersection(vector<Road>& road,vector<Point> point){
   return intersection;
 }
 
-//最短経路の頂点番号を返す関数
-vector<int> restore(int s,int t,vector<vector<Edge> >& graph,vector<double> dist){
-  vector<int> route;
-  vector<vector<int> > graph2(N);//s-t間の最短経路のみを残した有向グラフ
-  queue<int> que;
-  int used[N]={};//未探索の頂点は０探索済みなら１
-  que.push(t);
-  
-  //tからBFSをしてgraph2を構築
-  while(que.size()){
-    int v=que.front();
-    que.pop();
-    if(used[v])continue;
-    used[v]=1;
-    for(int i=0;i<graph[v].size();i++){
-	 int to=graph[v][i].to;
-	 double cost=graph[v][i].cost;
-	 if(dist[to]>dist[v])continue;
-	 if(abs(dist[v]-dist[to]-cost)<EPS){
-	   que.push(to);
-	   graph2[to].push_back(v);
-	 }
-    }
-  }
-  
-  //sから辞書順に頂点を追加
-  int node=s;
-  while(1){
-    route.push_back(node);
-    if(node==t)break;
-    int mi=N+1;
-    for(int i=0;i<graph2[node].size();i++){
-	 mi=min(mi,graph2[node][i]);
-    }
-    node=mi;
-  }
-  return route;
+vector<P> findBridge(vector<vector<Edge> >& g){
+  vector<int> low(N,-1);
+  vector<int> pre(N,-1);
+  int count=0;
+  vector<P> res;
+  dfs(g,res,0,count,-1,low,pre);
+  return res;
 }
 
-bool findVec(vector<int>& v1,vector<int>& v2){
-  if(v1.size()>=v2.size())return false;
-  for(int i=0;i<v1.size();i++){
-    if(v1[i]!=v2[i])return false;
-  }
-  return true;
-}
-
-vector<Path> yensAlgorithm(int k,int s,int t,int sz,vector<vector<Edge> >& graph){
-  vector<Path> kShortestPath;
-  set<Path> usedPath;
-  priority_queue<Path,vector<Path>,greater<Path> > que;
-  
-  Path tmp =dijkstra(s,t,sz,graph);
-  if(tmp.dist==INF)return kShortestPath;
-  que.push(tmp);
-  usedPath.insert(tmp);
-  for(int cn=0;cn<k;cn++){
-    if(que.empty())break;
-    double dist=que.top().dist;
-    vector<int> route=que.top().route;
-    que.pop();
-    kShortestPath.push_back({dist,route});
-
-    vector<vector<Edge> > tmpGraph=graph;
-    double spurDist=0;
-    vector<int> spurRoute;
-    for(int i=0;i<route.size()-1;i++){
-	 int spurNode=route[i];
-	 spurRoute.push_back(route[i]);
-	 set<int> outNode;
-	 
-	 for(int j=0;j<kShortestPath.size();j++){
-	   if(findVec(spurRoute,kShortestPath[j].route)){
-		outNode.insert(kShortestPath[j].route[i+1]);
-	   }
+int dfs(vector<vector<Edge> >& g,vector<P>& res,int v,int& count,int from,vector<int>& low,vector<int>& pre){
+  pre[v]=count++;
+  low[v]=pre[v];
+  for(int i=0;i<g[v].size();i++){
+    int to=g[v][i].to;
+    if(pre[to]==-1){
+	 low[v]=min(low[v],dfs(g,res,to,count,v,low,pre));
+	 if(low[to]==pre[to]){
+	   res.push_back(P(v,to));
 	 }
-	 
-	 for(int j=0;j<tmpGraph[spurNode].size();j++){
-	   if(outNode.count(tmpGraph[spurNode][j].to)){
-		tmpGraph[spurNode][j].cost=INF;
-	   }
-	 }
-	 
-	 Path tmp=dijkstra(spurNode,t,sz,tmpGraph);
-	 if(tmp.dist!=INF){
-	   tmp.route.insert(tmp.route.begin(),spurRoute.begin(),spurRoute.end()-1);
-	   tmp.dist+=spurDist;
-	   if(usedPath.count(tmp)==0){
-		que.push(tmp);
-		usedPath.insert(tmp);
-	   }
-	 }
-	 
-	 for(int j=0;j<tmpGraph[spurNode].size();j++){
-		tmpGraph[spurNode][j].cost=INF;
-		if(graph[spurNode][j].to==route[i+1])
-		  spurDist+=graph[spurNode][j].cost;
-	 }
+    }else{
+	 if(from==to)continue;
+	 low[v]=min(low[v],low[to]);
     }
   }
-  return kShortestPath;
+  return low[v];
 }
-
