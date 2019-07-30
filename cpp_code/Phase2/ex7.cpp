@@ -122,6 +122,7 @@ int main(){
 	   double cost=addp.dist(point[j]);
 	   graph[sz].push_back({j,cost});
 	   graph[j].push_back({sz,cost});
+	   stov[addp.name]=sz;
 	   point.push_back(addp);
 	   flag=1;
 	   break;
@@ -145,12 +146,13 @@ int main(){
 	   break;
 	 }
     }
-    
+    stov[addp.name]=point.size();
     point.push_back(addp);
     double cost=addp.dist(minp);
     int sz=point.size();
     graph[sz].push_back({sz-1,cost});
     graph[sz-1].push_back({sz,cost});
+    stov[minp.name]=point.size();
     point.push_back(minp);
   }
 
