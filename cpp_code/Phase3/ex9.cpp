@@ -408,7 +408,6 @@ void addPoint(Point addp,int i,vector<Point>& point,vector<vector<Edge> >& graph
 	 }
     }
   }
-  cout<<minp.x<<" "<<minp.y<<endl;
   int flag=0;
   for(int j=0;j<point.size();j++){
     if(minp==point[j]){
