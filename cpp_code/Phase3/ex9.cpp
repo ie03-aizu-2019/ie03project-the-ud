@@ -426,7 +426,7 @@ void addPoint(Point addp,int i,vector<Point>& point,vector<vector<Edge> >& graph
   int addn=point.size();
   for(int j=0;j<graph[node1].size();j++){
     if(graph[node1][j].to==node2){
-	 double cost=addp.dist(point[node1]);
+	 double cost=minp.dist(point[node1]);
 	 graph[node1][j]={addn,cost};
 	 graph[addn].push_back({node1,cost});
 	 break;
@@ -434,20 +434,20 @@ void addPoint(Point addp,int i,vector<Point>& point,vector<vector<Edge> >& graph
   }
   for(int j=0;j<graph[node2].size();j++){
     if(graph[node2][j].to==node1){
-	 double cost=addp.dist(point[node2]);
+	 double cost=minp.dist(point[node2]);
 	 graph[node2][j]={addn,cost};
 	 graph[addn].push_back({node2,cost});
 	 break;
     }
   }
-  stov[addp.name]=point.size();
-  point.push_back(addp);
+  stov[minp.name]=point.size();
+  point.push_back(minp);
   double cost=addp.dist(minp);
   int sz=point.size();
   graph[sz].push_back({sz-1,cost});
   graph[sz-1].push_back({sz,cost});
-  stov[minp.name]=point.size();
-  point.push_back(minp);
+  stov[addp.name]=point.size();
+  point.push_back(addp);
 }
 
 Point findMinDist(Point p1,Point p2,Point p3){
