@@ -97,17 +97,61 @@ int main(){
   vector<vector<Edge> > graph=makeGraph(n,m,point,road,intersection);
 
   for(int i=0;i<p;i++){
-    Point tmp;
-    cin>>tmp.x>>tmp.y;
-    Point minp={INF,INF,""};
+    Point addp;
+    cin>>addp.x>>addp.y;
+    addp.name=(string)("P"+to_string(i+1));
+    Point minp={INF,INF,(string)("PC"+to_string(i+1))};
+    int node1,node2;
     for(int j=0;j<point.size();j++){
 	 for(int k=0;k<graph[j].size();k++){
 	   int to=graph[j][k].to;
-	   Point p=findMinDist(tmp,point[j],point[to]);
-	   if(tmp.dist(p)<tmp.dist(minp))minp=p;
+	   Point p=findMinDist(addp,point[j],point[to]);
+	   if(addp.dist(p)<addp.dist(minp)){
+		minp.x=p.x;
+		minp.y=p.y;
+		node1=j;
+		node2=to;
+	   }
 	 }
     }
     cout<<minp.x<<" "<<minp.y<<endl;
+    int flag=0;
+    for(int j=0;j<point.size();j++){
+	 if(minp==point[j]){
+	   int sz=point.size();
+	   double cost=addp.dist(point[j]);
+	   graph[sz].push_back({j,cost});
+	   graph[j].push_back({sz,cost});
+	   point.push_back(addp);
+	   flag=1;
+	   break;
+	 }
+    }
+    if(flag==1)continue;
+    int addn=point.size();
+    for(int j=0;j<graph[node1].size();j++){
+	 if(graph[node1][j].to==node2){
+	   double cost=addp.dist(point[node1]);
+	   graph[node1][j]={addn,cost};
+	   graph[addn].push_back({node1,cost});
+	   break;
+	 }
+    }
+    for(int j=0;j<graph[node2].size();j++){
+	 if(graph[node2][j].to==node1){
+	   double cost=addp.dist(point[node2]);
+	   graph[node2][j]={addn,cost};
+	   graph[addn].push_back({node2,cost});
+	   break;
+	 }
+    }
+    
+    point.push_back(addp);
+    double cost=addp.dist(minp);
+    int sz=point.size();
+    graph[sz].push_back({sz-1,cost});
+    graph[sz-1].push_back({sz,cost});
+    point.push_back(minp);
   }
 
   return 0;
