@@ -102,7 +102,7 @@ class Path implements Comparable<Path> {
   }
 }
 
-public class P4 {
+public class P3 {
   private static Point findIntersection(Point p1, Point p2, Point p3, Point p4) {
     int INF = (int)1e9;
     double EPS = 0.0000000001;
@@ -351,7 +351,7 @@ public class P4 {
 
     for(int i=0;i<intersection.size();i++){
       Point pt = intersection.get(i).first;
-      System.out.println(pt.x + " " + pt.y);
+      //System.out.println(pt.x + " " + pt.y);
       pt.name="C"+String.valueOf(i+1);
       stov.put(pt.name,points.size());
       points.add(pt);
@@ -381,12 +381,12 @@ public class P4 {
         continue;
       }
       System.out.println(path.dist);
-      for(int j=0;j<path.route.size();j++){
+      /*for(int j=0;j<path.route.size();j++){
         if(j>0)System.out.print(" ");
         // cout<<point[path.route[i]].name;
         System.out.print(points.get(path.route.get(j)).name);
-      }
-      System.out.println("");
+      }*/
+      //System.out.println("");
     }
 
     for(int i=0;i<m;i++){
