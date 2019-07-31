@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 int main(){
-  int n,m,p,q; //初期条件, 2<=n<=1000, 1<=M<=500, p=0, 0<=q<=100
+  int n,m,p=0,q; //初期条件, 2<=n<=1000, 1<=M<=500, p=0, 0<=q<=100
   int x,y; // 0≦x,y≦10000,
   int a,b; // a,bはn以下のランダム
   int c,d,e; //Cを含んだランダム
@@ -10,10 +10,10 @@ int main(){
   srand(1);
 
 
-  n=rand()%999+2;
-  m=rand()%500+1;
-  p=rand()%101;
-  q=rand()%101;
+  n=999;
+  m=500;
+  p=0;
+  q=100;
   f=rand()%101;
 
   printf("%d %d %d %d\n",n,m,p,q);
@@ -26,8 +26,8 @@ int main(){
 
 
   for(int i=0;i<m;i++){
-    a=rand()%n;
-    b=rand()%n;
+    a=rand()%(n-2)+2;
+    b=rand()%(n-2)+2;
     printf("%d %d\n",a,b);
   }
 
